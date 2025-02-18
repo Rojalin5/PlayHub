@@ -9,17 +9,25 @@ import mongoose from "mongoose";
 const generateAccessAndRefreshToken = async (userID) => {
   try {
     const user = await User.findById(userID);
-    const accessToken = await user.generateAccessToken()
-    const refreshToken = await user.generateRefreshToken()
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
 
-    user.refreshToken = refreshToken
-    await user.save({ validateBeforeSave: false })
-    return { accessToken, refreshToken }
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
 
+    // Save the refresh token in the user document
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    // Return both tokens
+    return { accessToken, refreshToken };
   } catch (error) {
-    throw new ApiError(500, "Something went wrong while generating access and refresh token")
+    console.error("Error generating tokens:", error); // Log the error to see more details
+    throw new ApiError(500, "Something went wrong while generating access and refresh token");
   }
 }
+
 
 const registerUser = asyncHandler(async (req, res) => {
   //1.get user details from frontend
@@ -65,6 +73,7 @@ const registerUser = asyncHandler(async (req, res) => {
   console.log(req.files);
   //4  
   const avatarLocalPath = req.files?.avatar[0]?.path;
+  console.log(avatarLocalPath)
   // const coverImageLoaclPath = req.files?.coverImage[0]?.path;
 
   let coverImageLoaclPath;
@@ -170,8 +179,7 @@ const logOutUser = asyncHandler(async (req, res) => {
 })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  const incomingRefreshToken = req.cookies.
-    refreshToken || req.body.refreshToken
+  const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
   if (!incomingRefreshToken) {
     throw new ApiError(401, "unauthorized request")
   }
@@ -189,12 +197,12 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true
     }
-    const { accessToken, newRefreshToken } = await generateAccessAndRefreshToken(user._id)
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
     return res.status(200)
       .cookie("accessToken", accessToken, option)
-      .cookie("refreshToken", newRefreshToken, option)
+      .cookie("refreshToken", refreshToken, option)
       .json(
-        new ApiResponse(200, { accessToken, refreshToken: newRefreshToken }, "Access token refreshed")
+        new ApiResponse(200, { accessToken, refreshToken}, "Access token refreshed")
       )
 
   }
