@@ -28,7 +28,6 @@ const generateAccessAndRefreshToken = async (userID) => {
   }
 }
 
-
 const registerUser = asyncHandler(async (req, res) => {
   //1.get user details from frontend
   //2.validation - no empty (any field)
@@ -216,7 +215,8 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Password Doesn't Match")
   }
   const user = await User.findById(req.user?._id)
-  const isPasswordCorrect = await User.isPasswordCorrect(oldPassword)
+
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
   if (!isPasswordCorrect) {
     throw new ApiError(400, "Invalid Current Password")
   }
@@ -227,24 +227,24 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, {}, "Password Changed Successfully"))
 })
-
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res.status(200)
     .json(new ApiResponse(200, req.user, "current user fetched successfully"))
 })
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email } = req.body
+  const { fullName, email,username } = req.body
 
-  if (!fullName || email) {
-    throw new ApiError(400, "All fields are required.")
+  if (!fullName && !email || !username) {
+    throw new ApiError(400, "Atleast one fields is required.")
   }
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
         fullName,
-        email
+        email,
+        username
       }
     },
     { new: true }
@@ -333,10 +333,10 @@ const getuserChannelProfile = asyncHandler(async (req, res) => {
     {
       $addFields: {
         subscriberCount: {
-          $size: "subscribers",
+          $size: "$subscribers",
         },
         channelsSubscribedToCount: {
-          $size: "subscribedTo"
+          $size: "$subscribedTo"
         },
         isSubscribed: {
           $cond: {
@@ -387,13 +387,13 @@ const getWatchHistory = asyncHandler(async (req, res) => {
               localField: "owner",
               foreignField: "_id",
               as: "owner",
-              pipeline: {
+              pipeline: [{
                 $project: {
                   fullName: 1,
                   username: 1,
                   avatar: 1
                 }
-              }
+              }]
             }
           },
           {
