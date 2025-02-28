@@ -18,5 +18,5 @@ router.route("/videopublish").post
     ]),verifyJWT, publishVideo)
 
 router.route("/allvideos").get(verifyJWT, getAllVideos)
-router.route(":videoId").get(verifyJWT,getVideoById)
+router.route("/:videoId").get(verifyJWT,getVideoById)
 export default router;
