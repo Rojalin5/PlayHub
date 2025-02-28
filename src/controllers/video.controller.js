@@ -91,4 +91,25 @@ const publishVideo = asyncHandler(async (req, res) => {
         })
     }
 })
-export { getAllVideos, publishVideo }
+
+const getVideoById = asyncHandler(async (req, res) => {
+    try {
+        const {VideoId} = req.params;
+        if(!VideoId){
+            throw new ApiError(400, "VideoId is required")
+        }
+        const video = await Video.findById({_id:VideoId})
+        if(!video){
+            throw new ApiError(404,"Video not found")
+        }
+        res.status(200).
+        json(new ApiResponse(200,video,"Video Found Successfully"))
+
+    } catch (error) {
+        res.status(500).json({
+            success:false,
+            message:error.message || "Internal Server Error"
+        })
+    }
+})
+export { getAllVideos, publishVideo, getVideoById }
