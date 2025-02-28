@@ -14,10 +14,8 @@ router.route("/register").post
     {
         name:"coverImage",
         maxCount:1
-    }]),registerUser
-)
+    }]),registerUser)
 router.route("/login").post(loginUser)
--
 //secured route
 router.route("/logout").post(verifyJWT,logOutUser)
 router.route("/refresh-token").post(refreshAccessToken)

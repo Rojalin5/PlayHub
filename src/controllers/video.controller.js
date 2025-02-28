@@ -1,6 +1,9 @@
-import { asyncHandler } from "../src/utils/asyncHandler";
-import { Video } from "../src/models/video.model";
-import { ApiResponse } from "../utils/ApiResponse";
+import { asyncHandler } from "../utils/asyncHandler.js"
+import { Video } from "../models/videos.models.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { videohash } from "../utils/hashVideo.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
     try {
@@ -45,5 +48,47 @@ const getAllVideos = asyncHandler(async (req, res) => {
     }
 })
 
+const publishVideo = asyncHandler(async (req, res) => {
+    try {
+        const {title,description} = req.body;
+        const videoPath = req.files?.video[0]?.path;
+        if(!videoPath){
+            throw new ApiError(400, "Video file is required")
+        }
+        const hashedVideo = await videohash(videoPath);
 
-export { getAllVideos }
+        const existingVideo = await Video.findOne({hash:hashedVideo})
+        if(existingVideo){
+            throw new ApiError(400, "Video already exists")
+        }
+        const thumbnailPath = req.files?.thumbnail[0]?.path;
+        if(!thumbnailPath){
+            throw new ApiError(400, "Thumbnail file is required")
+        }
+        const videoFile = await uploadOnCloudinary(videoPath);
+        const thumbnailFile = await uploadOnCloudinary(thumbnailPath);
+       
+        const newVideo = await Video.create({
+            title,
+            description,
+            video: videoFile.url,
+            thumbnail: thumbnailFile.url,
+            hash: hashedVideo,
+            uploadedBy: req.user._id
+        })
+        if(!newVideo){
+            throw new ApiError(400, "Something went wrong while uploading video")
+        }
+        return res.status(201).json({
+            message: "Video uploaded successfully",
+            success:true
+     })
+    }
+     catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message || "Internal Server Error"
+        })
+    }
+})
+export { getAllVideos, publishVideo }
