@@ -5,4 +5,5 @@ import { healthCheckup} from "../controllers/healthCheckup.controller.js";
 const router = Router()
 
 router.get("/",verifyJWT, healthCheckup)
-export default router
+
+export default router;
