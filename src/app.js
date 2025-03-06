@@ -21,6 +21,8 @@ import subscriptionRoute from "./routes/subscription.routes.js"
 import commentRouter from "./routes/comments.routes.js"
 import healthCheckupRouter from "./routes/healthcheck.routes.js"
 import likeRouter from "./routes/likes.routes.js"
+import playlistRouter from "./routes/playlists.routes.js"
+import tweetRouter from "./routes/tweets.routes.js"
 
 
 
@@ -31,5 +33,9 @@ app.use("/api/v1/subscription",subscriptionRoute)
 app.use("/api/v1/comments",commentRouter)
 app.use("/api/v1/healthcheckup",healthCheckupRouter)
 app.use("/api/v1/likes",likeRouter)
+app.use("/api/v1/playlists",playlistRouter)
+app.use("/api/v1/tweets",tweetRouter)
+
+
 
 export default app;
