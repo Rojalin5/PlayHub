@@ -14,7 +14,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
         const limitNumber = parseInt(limit)
         const skip = (pageNumber - 1) * limitNumber
 
-        const comments = await Comment.find(videoId)
+        const comments = await Comment.find({video:videoId})
             .populate("owner", "username")
             .select("content owner createdAt")
             .skip(skip)
@@ -22,7 +22,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
         const allComments = await Comment.countDocuments({ video: videoId })
 
-        res.status(200).json(
+       return res.status(200).json(
             new ApiResponse(200, comments, "All Comments fetched Successfully", {
                 Page: pageNumber,
                 TotalPages: Math.ceil(allComments / limitNumber),
