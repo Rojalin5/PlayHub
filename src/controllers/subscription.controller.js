@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { Subscription } from "../models/subscriptions.models.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -10,9 +9,8 @@ const toggelSubscription = asyncHandler(async (req, res) => {
         if (!channelId) {
             throw new ApiError(400, "ChannelId is required")
         }
-        const { userId } = req.user;
-
-        if (channelId === userId) {
+        const userId = req.user._id;
+        if (channelId.toString() === userId.toString()) {
             throw new ApiError(400, "You can't subscribe to yourself")
         }
         const subscriberExists = await Subscription.findOne(
@@ -20,6 +18,7 @@ const toggelSubscription = asyncHandler(async (req, res) => {
                 subscriber: userId,
                 channel: channelId
             })
+
         if (subscriberExists) {
             await Subscription.findByIdAndDelete(subscriberExists._id)
             return res.status(200).json(
@@ -55,15 +54,11 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
             throw new ApiError(400, "ChannelId is required")
         }
         const subscribersList = await Subscription.find({ channel: channelId })
-        .populate("subscriber", "username email fullName avatar")
-        .select("subscriber createdAt")
-        .exec(); // Add this to ensure execution
-    
-    console.log("🎯 Populated Data:", subscribersList);
-    
+            .populate("subscriber", "username email fullName avatar")
+            .select("subscriber createdAt")
 
         if (!subscribersList || subscribersList.length === 0) {
-            throw new ApiError(200, [], "No subscribers found", { TotalSubscribers: 0 })
+            throw new ApiError(200,"No subscribers found")
         }
         return res.status(200).json(
             new ApiResponse(200, subscribersList, "Subscribers fetched Successfully", {
@@ -88,7 +83,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
             throw new ApiError(404, "SubscriberId is required")
         }
 
-        const channelList = await Subscription.find({ subscriber: objectId })
+        const channelList = await Subscription.find({ subscriber: subscriberId })
             .populate("channel", "username email fullname avatar")
             .select("channel createdAt")
         if (!channelList || channelList.length === 0) {
