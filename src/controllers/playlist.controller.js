@@ -6,10 +6,7 @@ import { Playlist } from '../models/playlists.models.js'
 const createPlaylist = asyncHandler(async (req, res) => {
     try {
         const { name, description } = req.body
-        console.log("User Object:", req.user);
-
         const userId = req.user._id
-        console.log(userId)
         if (!name) throw new ApiError(400, "Name is required")
         if (!description) throw new ApiError(400, "Description is required")
         const existedPlaylist = await Playlist.findOne({ name, owner: userId })
