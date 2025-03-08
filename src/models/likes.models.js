@@ -20,5 +20,7 @@ const likeSchema = new mongoose.Schema({
 
 },{timestamps:true}
 )
+
+
 export const Likes = mongoose.model("Likes", likeSchema)
 
