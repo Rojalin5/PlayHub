@@ -24,17 +24,18 @@ const videoSchema = new mongoose.Schema({
     }
     ,
     views: {
-        type: Number,
-        default: 0
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "View"
+
     },
     isPublished: {
         type: Boolean,
         default: true
-    }, 
-    hash:{
-        type:String,
-        unique:true,
-        select:false
+    },
+    hash: {
+        type: String,
+        unique: true,
+        select: false
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,

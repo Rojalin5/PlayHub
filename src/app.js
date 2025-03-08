@@ -24,7 +24,8 @@ import likeRouter from "./routes/likes.routes.js"
 import playlistRouter from "./routes/playlists.routes.js"
 import tweetRouter from "./routes/tweets.routes.js"
 import viewRouter from "./routes/views.routes.js"
-
+import dashBoardRouter from "./routes/dashboard.routes.js"
+ 
 //route declaration
 app.use("/api/v1/users",userRouter)
 app.use("/api/v1/video",videoRouter)
@@ -35,8 +36,7 @@ app.use("/api/v1/likes",likeRouter)
 app.use("/api/v1/playlists",playlistRouter)
 app.use("/api/v1/tweets",tweetRouter)
 app.use("/api/v1/views",viewRouter)
-
-
+app.use("/api/v1/dash-board",dashBoardRouter)
 
 
 export default app;
