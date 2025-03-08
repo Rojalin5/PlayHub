@@ -3,11 +3,13 @@ import mongoose from "mongoose";
 const subscriptionSchema = new mongoose.Schema({
     subscriber: {
         type: mongoose.Schema.Types.ObjectId,//who is subscribing
-        ref: "User"
+        ref: "User",
+        required:true
     },
     channel:{
         type: mongoose.Schema.Types.ObjectId,//whom the subscriber is subscribing
-        ref: "User" 
+        ref: "User" ,
+        required:true
     }
 }, { timestamps: true })
 

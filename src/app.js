@@ -23,8 +23,7 @@ import healthCheckupRouter from "./routes/healthcheck.routes.js"
 import likeRouter from "./routes/likes.routes.js"
 import playlistRouter from "./routes/playlists.routes.js"
 import tweetRouter from "./routes/tweets.routes.js"
-
-
+import viewRouter from "./routes/views.routes.js"
 
 //route declaration
 app.use("/api/v1/users",userRouter)
@@ -35,6 +34,8 @@ app.use("/api/v1/healthcheckup",healthCheckupRouter)
 app.use("/api/v1/likes",likeRouter)
 app.use("/api/v1/playlists",playlistRouter)
 app.use("/api/v1/tweets",tweetRouter)
+app.use("/api/v1/views",viewRouter)
+
 
 
 

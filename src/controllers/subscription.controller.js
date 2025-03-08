@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Subscription } from "../models/subscriptions.models.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -22,16 +23,18 @@ const toggelSubscription = asyncHandler(async (req, res) => {
         if (subscriberExists) {
             await Subscription.findByIdAndDelete(subscriberExists._id)
             return res.status(200).json(
-                new ApiError(200, "Unsubscribed successfully")
+                new ApiResponse(200, null, "Unsubscribed successfully")
             )
         }
-        await Subscription.create({
+        const newSubscriber = await Subscription.create({
             subscriber: userId,
             channel: channelId
         })
-        await Subscription.save()
+        if (!newSubscriber) {
+            throw new ApiError(500, "Subscription failed. Please try again.");
+        }
         return res.status(200).json(
-            new ApiError(200, "Subscribed successfully")
+            new ApiResponse(200, newSubscriber, "Subscribed successfully")
         )
     }
     catch (error) {
@@ -52,11 +55,15 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
             throw new ApiError(400, "ChannelId is required")
         }
         const subscribersList = await Subscription.find({ channel: channelId })
-            .populate("subscriber", "username email fullname avatar")
-            .select("subscriber createdAt")
+        .populate("subscriber", "username email fullName avatar")
+        .select("subscriber createdAt")
+        .exec(); // Add this to ensure execution
+    
+    console.log("🎯 Populated Data:", subscribersList);
+    
 
-        if (!subscribersList.length === 0) {
-            throw new ApiError(404, "No subscribers found")
+        if (!subscribersList || subscribersList.length === 0) {
+            throw new ApiError(200, [], "No subscribers found", { TotalSubscribers: 0 })
         }
         return res.status(200).json(
             new ApiResponse(200, subscribersList, "Subscribers fetched Successfully", {
@@ -80,11 +87,14 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
         if (!subscriberId) {
             throw new ApiError(404, "SubscriberId is required")
         }
-        const channelList = await Subscription.find({ subscriber: subscriberId })
+
+        const channelList = await Subscription.find({ subscriber: objectId })
             .populate("channel", "username email fullname avatar")
             .select("channel createdAt")
-        if (channelList.length === 0) {
-            throw new ApiError(400, "No Channel Found")
+        if (!channelList || channelList.length === 0) {
+            return res.status(200).json(
+                new ApiResponse(200, [], "No channels found", { TotalChannels: 0 })
+            );
         }
         return res.status(200).json(
             new ApiResponse(200, channelList, "Channel List fetched Successfully", {

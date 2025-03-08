@@ -4,7 +4,7 @@ import { toggelSubscription,getUserChannelSubscribers,getSubscribedChannels } fr
 
 const router = Router()
 
-router.route("/toggle/:subscriptionId").patch(verifyJWT,toggelSubscription)
+router.route("/toggle/:channelId").patch(verifyJWT,toggelSubscription)
 router.route("/subscriberslist/:channelId").get(verifyJWT,getUserChannelSubscribers)
 router.route("/channelslist/:subscriberId").get(verifyJWT,getSubscribedChannels)    
 
